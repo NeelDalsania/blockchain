@@ -8,6 +8,8 @@ import {
     "bytes"
     "encoding/binary"
     "encoding/json"
+    "crypto/rand"
+    "crypto/sha256"
 }
 
 type BlockchainInterface interface {
@@ -85,10 +87,41 @@ func (bc *Blockchain) ResolveConflicts() bool {
 
 func (bc *Blockchain) CreateNewBlock(proof int64, previousHash string) Block {
 
+    if previousHash == "" {
+        prevBlock := bc.FinalBlock()
+        prevHash := computeHash(prevBlock)
+    }
+    else{
+        prevHash := previousHash
+    }
+
+    newBlock := Block{
+        Index:  int64(len(bc.chain)+1),
+        Timestamp:  time.Now().UnixNano(),
+        Transactions:   bc.transactions,
+        Proof: proof,
+        PreviousHash: prevHash,
+    }
+
+    bc.transaction = nil
+    bc.chain = append(bc.chain, newBlock)
+    return newBlock
+}
+
+func computeHash(block Block) string {
+    var buffer bytes.Buffer
+    binary.Write(&buffer, binary.BigEndian, block)
+    return ComuteSHA256(buffer.Bytes())
+}
+
+func ComputeSHA256(bytes []bytes) string {
+    sum := sha256.Sum256(bytes)
+    return fmt.Printf("%x", sum)
 }
 
 func (bc *Blockchain) RegisterNewTransaction(trans Transaction) int64 {
-
+    bc.transactions = append(bc.transactions, trans)
+    return bc.FinalBlock().Index + 1
 }
 
 func (bc *Blockchain) FinalBlock() Block {
