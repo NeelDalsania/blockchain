@@ -204,7 +204,6 @@ func NewStringSet() StringSet {
     return StringSet{make(map[string]bool)}
 }
 
-
 func (set *StringSet) Add(str string) bool {
     _, found := set.set[str]
     set.set[str] = true
@@ -217,4 +216,19 @@ func (set *StringSet) Keys() []string {
         keys = append(keys, k)
     }
     return keys
+}
+
+func ComputeHashSha256(bytes []byte) string {
+    return fmt.Sprintf("%x", sha256.Sum256(bytes))
+}
+
+func PseudoUUID() string {
+    bytes := make([]byte, 16)
+    _, err := rand.Read(bytes)
+    if err != nil {
+        fmt.Println("Error: ", err)
+        return ""
+    }
+
+    return fmt.Sprintf("%X-%X-%X-%X-%X", bytes[0:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])
 }
