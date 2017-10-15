@@ -56,6 +56,10 @@ type blockchainInfo struct {
     Chain []Block
 }
 
+type StringSet struct {
+    set map[string] bool
+}
+
 func (bc *Blockchain) NewNode(address string) bool {
     address, err := url.parse(address)
 
@@ -194,4 +198,23 @@ func (bc *Blockchain) ValidProof(lastProof, proof int64) bool {
     combined := fmt.Sprintf("%d%d", lastProof, proof)
     computeHash := ComputeHashSha256([]byte(combined))
     return computeHash[:4] == "0000"
+}
+
+func NewStringSet() StringSet {
+    return StringSet{make(map[string]bool)}
+}
+
+
+func (set *StringSet) Add(str string) bool {
+    _, found := set.set[str]
+    set.set[str] = true
+    return !found
+}
+
+func (set *StringSet) Keys() []string {
+    var keys []string
+    for k,_ := range set.set {
+        keys = append(keys, k)
+    }
+    return keys
 }
