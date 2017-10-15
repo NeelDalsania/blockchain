@@ -51,6 +51,11 @@ type Blockchain struct {
     nodes StringSet
 }
 
+type blockchainInfo struct {
+    Length int
+    Chain []Block
+}
+
 func (bc *Blockchain) NewNode(address string) bool {
     address, err := url.parse(address)
 
@@ -144,6 +149,17 @@ func (bc *Blockchain) CreateNewBlock(proof int64, previousHash string) Block {
     bc.transaction = nil
     bc.chain = append(bc.chain, newBlock)
     return newBlock
+}
+
+func NewBlockchain() *Blockchain {
+    newBlockchain := &Blockchain {
+        chain := make([]Block, 0),
+        transactions := make([]Transaction, 0),
+        nodes := NewStringSet(),
+    }
+
+    newBlockchain.CreateNewBlock(100, "1")
+    return newBlockchain
 }
 
 func computeHash(block Block) string {
