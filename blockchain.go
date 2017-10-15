@@ -82,7 +82,45 @@ func (bc *Blockchain) VerifyChain(chain *[]Block) bool {
 }
 
 func (bc *Blockchain) ResolveConflicts() bool {
+    neighbours := bc.nodes
+    newChain = make([]Block, 0)
 
+    largerChain := len(bc.chain)
+
+    for _, node := range neighbours.Keys() {
+        other, err := findExternalChain(node)
+
+        if err != nil {
+            continue
+        }
+
+        if other.Length > largerChain && bc.VerifyChain(&other.Chain) {
+            largerChain = other.Length
+            newChain = other.Chain
+        }
+    }
+
+    if len(newChain) > 0 {
+        bc.chain = newChain
+        return true
+    }
+
+    return false
+}
+
+func findExternalChain (address String) (blockchainInfo, error) {
+    res, err := http.Get(fmt.Sprintf("http://%s/chain", address))
+    if err == nil && res.StatusCode == http.StatusOK {
+        var blck = blockchainInfo
+
+        if err := json.NewDecoder(response.Body).Decode(&blck); err != nil {
+            return blockchainInfo{}, err
+        }
+
+        return blck, nil
+    }
+
+    return blockchainInfo{}, err
 }
 
 func (bc *Blockchain) CreateNewBlock(proof int64, previousHash string) Block {
